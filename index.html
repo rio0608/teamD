@@ -96,16 +96,24 @@ button{
 <h2>00:00:00</h2>
 </div>
 
+
 <label>科目を選択</label>
 
-<select>
-<option>数学</option>
-<option>英語</option>
-<option>国語</option>
-<option>理科</option>
-<option>社会</option>
-<option>情報</option>
+<select id="subject">
+    <option>数学</option>
+    <option>英語</option>
+    <option>国語</option>
+    <option>理科</option>
+    <option>社会</option>
+    <option>情報</option>
+    <option value="other">その他</option>
 </select>
+
+<input
+    type="text"
+    id="otherSubject"
+    placeholder="科目を入力してください"
+    style="display:none; width:100%; padding:10px; margin-top:10px; border-radius:8px;">
 
 <div class="timer">
 00:00:00
@@ -117,6 +125,51 @@ button{
 </div>
 
 </div>
+
+<script>
+let timer;
+let seconds = 0;
+let running = false;
+
+// タイマー表示
+function updateTimer() {
+    const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+    const s = String(seconds % 60).padStart(2, "0");
+
+    document.querySelector(".timer").textContent = `${h}:${m}:${s}`;
+}
+
+// 開始ボタン
+document.querySelector(".start").addEventListener("click", () => {
+    if (running) return;
+
+    running = true;
+
+    timer = setInterval(() => {
+        seconds++;
+        updateTimer();
+    }, 1000);
+});
+
+// 終了ボタン
+document.querySelector(".stop").addEventListener("click", () => {
+    clearInterval(timer);
+    running = false;
+});
+
+const subject = document.getElementById("subject");
+const otherSubject = document.getElementById("otherSubject");
+
+subject.addEventListener("change", function () {
+    if (this.value === "other") {
+        otherSubject.style.display = "block";
+    } else {
+        otherSubject.style.display = "none";
+        otherSubject.value = "";
+    }
+});
+</script>
 
 </body>
 </html>
