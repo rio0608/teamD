@@ -10,7 +10,8 @@
 body{
     margin:0;
     font-family:Arial, sans-serif;
-    background:#f4f6fb;
+    background:linear-gradient(180deg, #f5f7ff 0%, #eef3ff 100%);
+    color:#111827;
 }
 
 .container{
@@ -20,6 +21,181 @@ body{
     border-radius:20px;
     padding:25px;
     box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+.statistics-panel{
+    padding:18px 14px 18px;
+    background:linear-gradient(180deg, #ffffff 0%, #f6f8ff 100%);
+}
+
+.stats-topbar{
+    display:grid;
+    grid-template-columns:40px 1fr 40px;
+    align-items:center;
+    margin-bottom:16px;
+}
+
+.stats-topbar h1{
+    margin:0;
+    color:#111827;
+    font-size:20px;
+    text-align:center;
+}
+
+.stats-back-button,
+.date-nav-button{
+    width:40px;
+    height:40px;
+    border:none;
+    border-radius:12px;
+    background:#eef2ff;
+    color:#1d4ed8;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.period-switch{
+    display:flex;
+    gap:0;
+    background:#e7ebf3;
+    padding:3px;
+    border-radius:12px;
+    margin-bottom:18px;
+}
+
+.period-switch .tab-btn{
+    margin:0;
+    border-radius:10px;
+    padding:10px 0;
+    font-size:14px;
+    color:#4b5563;
+    background:transparent;
+    border-bottom:none;
+}
+
+.period-switch .tab-btn.active{
+    background:linear-gradient(180deg, #2f6bdb 0%, #1d4ed8 100%);
+    color:#fff;
+    box-shadow:0 6px 16px rgba(29, 78, 216, 0.24);
+}
+
+.date-row{
+    display:grid;
+    grid-template-columns:40px 1fr 40px;
+    align-items:center;
+    gap:10px;
+    margin-bottom:16px;
+}
+
+.date-display{
+    text-align:center;
+    font-weight:700;
+    color:#1f2937;
+    padding:10px 12px;
+    border-radius:14px;
+    background:#f8fafc;
+    box-shadow:inset 0 0 0 1px #eef2f7;
+}
+
+.stat-card{
+    background:#fff;
+    border-radius:18px;
+    padding:14px;
+    margin-bottom:14px;
+    box-shadow:0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.stat-card h2{
+    margin:0 0 12px;
+    font-size:15px;
+    color:#111827;
+}
+
+.total-time-card{
+    text-align:left;
+}
+
+.total-time-card p{
+    margin:0 0 6px;
+    font-size:13px;
+    font-weight:700;
+    color:#111827;
+}
+
+.total-time-value{
+    margin:0;
+    text-align:center;
+    color:#1d4ed8;
+    font-size:32px;
+    font-weight:800;
+    letter-spacing:0.03em;
+}
+
+.pie-layout{
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) 120px;
+    gap:8px;
+    align-items:center;
+}
+
+.legend-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.legend-item{
+    display:grid;
+    grid-template-columns:12px 1fr auto;
+    gap:8px;
+    align-items:center;
+    font-size:13px;
+}
+
+.legend-swatch{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+}
+
+.legend-name{
+    color:#1f2937;
+    font-weight:700;
+}
+
+.legend-value{
+    color:#4b5563;
+    font-weight:700;
+}
+
+.chart-container{
+    position:relative;
+    height:260px;
+}
+
+.chart-container.compact-chart{
+    height:180px;
+}
+
+.chart-card .chart-container{
+    height:210px;
+}
+
+.chart-empty{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:100%;
+    color:#6b7280;
+    font-size:14px;
+}
+
+.date-nav-button:disabled{
+    opacity:0.45;
+    cursor:default;
 }
 
 h1{
@@ -279,22 +455,46 @@ button{
 
 </div>
 
-<div class="container" id="statisticsScreen" style="display:none;">
+<div class="container statistics-panel" id="statisticsScreen" style="display:none;">
 
-<h1>📊 統計</h1>
-
-<div class="tabs">
-    <button class="tab-btn active" data-period="day">日別</button>
-    <button class="tab-btn" data-period="week">週別</button>
-    <button class="tab-btn" data-period="month">月別</button>
+<div class="stats-topbar">
+    <button type="button" class="stats-back-button" onclick="closeStatistics()">‹</button>
+    <h1>統計</h1>
+    <span></span>
 </div>
 
-<div class="chart-container">
-    <canvas id="pieChart"></canvas>
+<div class="period-switch">
+    <button class="tab-btn active" data-period="day">日</button>
+    <button class="tab-btn" data-period="week">週</button>
+    <button class="tab-btn" data-period="month">月</button>
 </div>
 
-<div class="chart-container">
-    <canvas id="barChart"></canvas>
+<div class="date-row">
+    <button type="button" class="date-nav-button" id="statisticsPrevDate">‹</button>
+    <div class="date-display" id="statisticsDateLabel"></div>
+    <button type="button" class="date-nav-button" id="statisticsNextDate">›</button>
+</div>
+
+<div class="stat-card total-time-card">
+    <p>合計時間</p>
+    <div class="total-time-value" id="statisticsTotalTime">00:00:00</div>
+</div>
+
+<div class="stat-card chart-card">
+    <h2>科目別の時間</h2>
+    <div class="pie-layout">
+        <div class="chart-container compact-chart">
+            <canvas id="pieChart"></canvas>
+        </div>
+        <ul class="legend-list" id="statisticsLegend"></ul>
+    </div>
+</div>
+
+<div class="stat-card chart-card">
+    <h2 id="statisticsTrendTitle">時間の推移（1週間）</h2>
+    <div class="chart-container">
+        <canvas id="barChart"></canvas>
+    </div>
 </div>
 
 <button class="back" onclick="closeStatistics()">戻る</button>
@@ -472,24 +672,69 @@ document.querySelector(".back").addEventListener("click", () => {
 let pieChartInstance = null;
 let barChartInstance = null;
 let currentPeriod = 'day';
+let selectedStatisticsDate = new Date();
+
+function formatStatisticsDate(date, period) {
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'short'
+    };
+
+    if (period === 'day') {
+        return date.toLocaleDateString('ja-JP', options);
+    }
+
+    if (period === 'week') {
+        const startDate = new Date(date);
+        startDate.setDate(date.getDate() - date.getDay());
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+
+        const startLabel = startDate.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' });
+        const endLabel = endDate.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' });
+        return `${startLabel}〜${endLabel}`;
+    }
+
+    return date.toLocaleDateString('ja-JP', {
+        year: 'numeric',
+        month: 'long'
+    });
+}
+
+function getTrendTitle(period) {
+    if (period === 'day') {
+        return '時間の推移（1日）';
+    }
+
+    if (period === 'week') {
+        return '時間の推移（1週間）';
+    }
+
+    return '時間の推移（1か月）';
+}
 
 // 日付を取得
-function getDateRange(period) {
-    const today = new Date();
-    let startDate = new Date();
-    let endDate = new Date();
+function getDateRange(period, baseDate = new Date()) {
+    const anchorDate = new Date(baseDate);
+    let startDate = new Date(anchorDate);
+    let endDate = new Date(anchorDate);
     
     if (period === 'day') {
         startDate.setHours(0, 0, 0, 0);
         endDate.setHours(23, 59, 59, 999);
     } else if (period === 'week') {
-        const dayOfWeek = today.getDay();
-        startDate.setDate(today.getDate() - dayOfWeek);
+        const dayOfWeek = anchorDate.getDay();
+        startDate.setDate(anchorDate.getDate() - dayOfWeek);
         startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
         endDate.setHours(23, 59, 59, 999);
     } else if (period === 'month') {
         startDate.setDate(1);
         startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(anchorDate.getFullYear(), anchorDate.getMonth() + 1, 0);
         endDate.setHours(23, 59, 59, 999);
     }
     
@@ -497,8 +742,8 @@ function getDateRange(period) {
 }
 
 // 記録をフィルタリング
-function filterRecordsByPeriod(records, period) {
-    const { startDate, endDate } = getDateRange(period);
+function filterRecordsByPeriod(records, period, baseDate = new Date()) {
+    const { startDate, endDate } = getDateRange(period, baseDate);
     
     return records.filter(record => {
         const recordDate = new Date(record.date);
@@ -510,6 +755,29 @@ function filterRecordsByPeriod(records, period) {
 function generatePieChart(records) {
     const { summary } = calculateSummary(records);
     const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+    const legend = document.getElementById('statisticsLegend');
+    const labels = Object.keys(summary);
+    const values = Object.values(summary);
+    const totalSeconds = values.reduce((sum, value) => sum + value, 0);
+    const chartValues = values.length > 0 ? values.map(seconds => Math.max(1, Math.floor(seconds / 60))) : [1];
+
+    if (legend) {
+        if (labels.length === 0) {
+            legend.innerHTML = '<li class="chart-empty">記録がありません</li>';
+        } else {
+            legend.innerHTML = labels.map((subject, index) => {
+                const seconds = summary[subject];
+                const percent = totalSeconds > 0 ? Math.round((seconds / totalSeconds) * 100) : 0;
+                return `
+                    <li class="legend-item">
+                        <span class="legend-swatch" style="background:${colors[index % colors.length]}"></span>
+                        <span class="legend-name">${subject}</span>
+                        <span class="legend-value">${percent}%</span>
+                    </li>
+                `;
+            }).join('');
+        }
+    }
     
     const ctx = document.getElementById('pieChart').getContext('2d');
     
@@ -520,10 +788,10 @@ function generatePieChart(records) {
     pieChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: Object.keys(summary),
+            labels,
             datasets: [{
-                data: Object.values(summary).map(s => Math.floor(s / 60)),
-                backgroundColor: colors,
+                data: chartValues,
+                backgroundColor: labels.length > 0 ? colors : ['#e5e7eb'],
                 borderColor: '#fff',
                 borderWidth: 2
             }]
@@ -533,7 +801,7 @@ function generatePieChart(records) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    display: false
                 }
             }
         }
@@ -541,7 +809,7 @@ function generatePieChart(records) {
 }
 
 // 棒グラフ生成
-function generateBarChart(records, period) {
+function generateBarChart(records, period, baseDate = new Date()) {
     const labels = [];
     const data = {};
     
@@ -586,8 +854,7 @@ function generateBarChart(records, period) {
         });
     } else if (period === 'month') {
         // 日ごと
-        const today = new Date();
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const daysInMonth = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0).getDate();
         
         for (let i = 1; i <= daysInMonth; i++) {
             labels.push(`${i}日`);
@@ -650,24 +917,42 @@ function generateBarChart(records, period) {
 }
 
 // 統計表示
-function showStatistics(period) {
+function showStatistics(period = currentPeriod) {
     const records = JSON.parse(localStorage.getItem('records')) || [];
-    const filteredRecords = filterRecordsByPeriod(records, period);
-    
-    if (filteredRecords.length === 0) {
-        alert('この期間のデータがありません');
-        return;
-    }
+    const filteredRecords = filterRecordsByPeriod(records, period, selectedStatisticsDate);
+    const { totalSeconds } = calculateSummary(filteredRecords);
+
+    document.getElementById('statisticsDateLabel').textContent = formatStatisticsDate(selectedStatisticsDate, period);
+    document.getElementById('statisticsTotalTime').textContent = secondsToTime(totalSeconds);
+    document.getElementById('statisticsTrendTitle').textContent = getTrendTitle(period);
     
     generatePieChart(filteredRecords);
-    generateBarChart(filteredRecords, period);
+    generateBarChart(filteredRecords, period, selectedStatisticsDate);
+}
+
+function shiftStatisticsDate(step) {
+    const nextDate = new Date(selectedStatisticsDate);
+
+    if (currentPeriod === 'day') {
+        nextDate.setDate(nextDate.getDate() + step);
+    } else if (currentPeriod === 'week') {
+        nextDate.setDate(nextDate.getDate() + (step * 7));
+    } else {
+        nextDate.setMonth(nextDate.getMonth() + step);
+    }
+
+    selectedStatisticsDate = nextDate;
+    showStatistics(currentPeriod);
 }
 
 // 統計ボタン
 document.querySelector('.statistics').addEventListener('click', () => {
     document.getElementById('homeScreen').style.display = 'none';
     document.getElementById('statisticsScreen').style.display = 'block';
+    selectedStatisticsDate = new Date();
     currentPeriod = 'day';
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector('.tab-btn[data-period="day"]').classList.add('active');
     showStatistics('day');
 });
 
@@ -679,6 +964,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         currentPeriod = e.target.dataset.period;
         showStatistics(currentPeriod);
     });
+});
+
+document.getElementById('statisticsPrevDate').addEventListener('click', () => {
+    shiftStatisticsDate(-1);
+});
+
+document.getElementById('statisticsNextDate').addEventListener('click', () => {
+    shiftStatisticsDate(1);
 });
 
 // 統計画面を閉じる
