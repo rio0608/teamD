@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Time Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f4f6fb;
+}
+
+.container{
+    width:350px;
+    margin:40px auto;
+    background:white;
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+h1{
+    text-align:center;
+    color:#2563eb;
+}
+
+.total{
+    background:#eef4ff;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+    margin-top:20px;
+}
+
+.total h2{
+    color:#2563eb;
+    font-size:35px;
+    margin:10px 0;
+}
+
+label{
+    display:block;
+    margin-top:20px;
+    font-weight:bold;
+}
+
+select{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    margin-top:8px;
+}
+
+.timer{
+    text-align:center;
+    font-size:40px;
+    margin:30px 0;
+    font-weight:bold;
+}
+
+.buttons{
+    display:flex;
+    justify-content:space-between;
+}
+
+button{
+    width:45%;
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.start{
+    background:#22c55e;
+}
+
+.stop{
+    background:#ef4444;
+}
+.reset{
+    width:100%;
+    margin-top:15px;
+    padding:15px;
+    background:#6b7280;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+}
+.save{
+    width:100%;
+    margin-top:15px;
+    padding:15px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+}
+.history{
+    width:100%;
+    margin-top:10px;
+    padding:15px;
+    background:#f59e0b;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.back{
+    width:100%;
+    margin-top:15px;
+    padding:15px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+#historyArea{
+    margin-top:20px;
+    background:#f8f9fa;
+    padding:15px;
+    border-radius:10px;
+}
+
+.record{
+    border-bottom:1px solid #ddd;
+    padding:10px 0;
+}
+
+.summary{
+    background:#e0f2fe;
+    padding:15px;
+    border-radius:10px;
+    margin-top:20px;
+}
+
+.summary h3{
+    color:#0284c7;
+    margin-top:0;
+}
+
+.subject-total{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid #bae6fd;
+}
+
+.subject-total:last-child{
+    border-bottom:none;
+}
+
+.grand-total{
+    background:#0284c7;
+    color:white;
+    padding:10px;
+    border-radius:8px;
+    text-align:center;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+.tabs{
+    display:flex;
+    justify-content:space-around;
+    margin-top:20px;
+    border-bottom:2px solid #e5e7eb;
+}
+
+.tab-btn{
+    width:100%;
+    padding:10px;
+    border:none;
+    background:none;
+    color:#6b7280;
+    font-weight:bold;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    margin-bottom:-2px;
+}
+
+.tab-btn.active{
+    color:#2563eb;
+    border-bottom-color:#2563eb;
+}
+
+.chart-container{
+    position:relative;
+    height:300px;
+    margin-top:20px;
+}
+
+.statistics{
+    width:100%;
+    margin-top:10px;
+    padding:15px;
+    background:#6366f1;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.statistics h2{
+    color:#2563eb;
+    margin-top:0;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container" id="homeScreen">
+
+<h1>📚 Study Time Tracker</h1>
+
+<div class="total">
+<p>今日の勉強時間</p>
+<h2>00:00:00</h2>
+</div>
+
+
+<label>科目を選択</label>
+
+<select id="subject">
+    <option>数学</option>
+    <option>英語</option>
+    <option>国語</option>
+    <option>理科</option>
+    <option>社会</option>
+    <option>情報</option>
+    <option value="other">その他</option>
+</select>
+
+<input
+    type="text"
+    id="otherSubject"
+    placeholder="科目を入力してください"
+    style="display:none; width:100%; padding:10px; margin-top:10px; border-radius:8px;">
+
+<div class="timer">
+00:00:00
+</div>
+
+<div class="buttons">
+<button class="start">開始</button>
+<button class="stop">終了</button>
+</div>
+<button class="reset">リセット</button>
+<button class="save">記録を保存</button>
+<button class="history">記録一覧</button>
+<button class="statistics">統計</button>
+
+
+</div>
+
+<div class="container" id="historyScreen" style="display:none;">
+
+<h1>📖 勉強記録</h1>
+
+<div id="historyList"></div>
+
+<button class="back">戻る</button>
+
+</div>
+
+<div class="container" id="statisticsScreen" style="display:none;">
+
+<h1>📊 統計</h1>
+
+<div class="tabs">
+    <button class="tab-btn active" data-period="day">日別</button>
+    <button class="tab-btn" data-period="week">週別</button>
+    <button class="tab-btn" data-period="month">月別</button>
+</div>
+
+<div class="chart-container">
+    <canvas id="pieChart"></canvas>
+</div>
+
+<div class="chart-container">
+    <canvas id="barChart"></canvas>
+</div>
+
+<button class="back" onclick="closeStatistics()">戻る</button>
+
+</div>
+
+<script>
+let timer;
+let seconds = 0;
+let running = false;
+
+// タイマー表示
+function updateTimer() {
+    const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+    const s = String(seconds % 60).padStart(2, "0");
+
+    document.querySelector(".timer").textContent = `${h}:${m}:${s}`;
+}
+
+// 時間文字列を秒に変換
+function timeToSeconds(timeStr) {
+    const parts = timeStr.split(":");
+    return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+}
+
+// 秒を時間文字列に変換
+function secondsToTime(totalSeconds) {
+    const h = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+    const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+    const s = String(totalSeconds % 60).padStart(2, "0");
+    return `${h}:${m}:${s}`;
+}
+
+// 開始ボタン
+document.querySelector(".start").addEventListener("click", () => {
+    if (running) return;
+
+    running = true;
+
+    timer = setInterval(() => {
+        seconds++;
+        updateTimer();
+    }, 1000);
+});
+
+// 終了ボタン
+document.querySelector(".stop").addEventListener("click", () => {
+    clearInterval(timer);
+    running = false;
+});
+
+// リセットボタン
+document.querySelector(".reset").addEventListener("click", () => {
+    clearInterval(timer);
+    seconds = 0;
+    running = false;
+    updateTimer();
+});
+
+document.querySelector(".save").addEventListener("click", () => {
+
+    const subjectSelect = document.getElementById("subject");
+
+    let subject;
+
+    if(subjectSelect.value === "other"){
+        subject = document.getElementById("otherSubject").value;
+    }else{
+        subject = subjectSelect.value;
+    }
+
+    const record = {
+        date: new Date().toLocaleDateString(),
+        subject: subject,
+        time: document.querySelector(".timer").textContent
+    };
+
+    let records = JSON.parse(localStorage.getItem("records")) || [];
+
+    records.push(record);
+
+    localStorage.setItem("records", JSON.stringify(records));
+
+    alert("勉強記録を保存しました！");
+});
+
+const subject = document.getElementById("subject");
+const otherSubject = document.getElementById("otherSubject");
+
+subject.addEventListener("change", function () {
+    if (this.value === "other") {
+        otherSubject.style.display = "block";
+    } else {
+        otherSubject.style.display = "none";
+        otherSubject.value = "";
+    }
+});
+
+// 科目ごとの集計を計算
+function calculateSummary(records) {
+    const summary = {};
+    let totalSeconds = 0;
+
+    records.forEach(record => {
+        const seconds = timeToSeconds(record.time);
+        totalSeconds += seconds;
+
+        if (!summary[record.subject]) {
+            summary[record.subject] = 0;
+        }
+        summary[record.subject] += seconds;
+    });
+
+    return { summary, totalSeconds };
+}
+
+document.querySelector(".history").addEventListener("click", () => {
+
+    document.getElementById("homeScreen").style.display = "none";
+    document.getElementById("historyScreen").style.display = "block";
+
+    let records = JSON.parse(localStorage.getItem("records")) || [];
+
+    let html = "";
+
+    if(records.length === 0){
+        html = "<p>記録がありません。</p>";
+    }else{
+
+        records.forEach(record => {
+
+            html += `
+            <div class="record">
+                <strong>${record.subject}</strong><br>
+                ${record.date}<br>
+                勉強時間：${record.time}
+            </div>
+            `;
+
+        });
+
+        // 集計を追加
+        const { summary, totalSeconds } = calculateSummary(records);
+        
+        html += `<div class="summary">
+            <h3>📊 科目別集計</h3>`;
+        
+        for (const [subject, seconds] of Object.entries(summary)) {
+            html += `
+            <div class="subject-total">
+                <span>${subject}</span>
+                <span>${secondsToTime(seconds)}</span>
+            </div>
+            `;
+        }
+        
+        html += `<div class="grand-total">
+            合計：${secondsToTime(totalSeconds)}
+        </div>
+        </div>`;
+    }
+
+    document.getElementById("historyList").innerHTML = html;
+
+});
+
+document.querySelector(".back").addEventListener("click", () => {
+
+    document.getElementById("historyScreen").style.display = "none";
+    document.getElementById("homeScreen").style.display = "block";
+
+});
+
+let pieChartInstance = null;
+let barChartInstance = null;
+let currentPeriod = 'day';
+
+// 日付を取得
+function getDateRange(period) {
+    const today = new Date();
+    let startDate = new Date();
+    let endDate = new Date();
+    
+    if (period === 'day') {
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+    } else if (period === 'week') {
+        const dayOfWeek = today.getDay();
+        startDate.setDate(today.getDate() - dayOfWeek);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+    } else if (period === 'month') {
+        startDate.setDate(1);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+    }
+    
+    return { startDate, endDate };
+}
+
+// 記録をフィルタリング
+function filterRecordsByPeriod(records, period) {
+    const { startDate, endDate } = getDateRange(period);
+    
+    return records.filter(record => {
+        const recordDate = new Date(record.date);
+        return recordDate >= startDate && recordDate <= endDate;
+    });
+}
+
+// 円グラフ生成
+function generatePieChart(records) {
+    const { summary } = calculateSummary(records);
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+    
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    
+    if (pieChartInstance) {
+        pieChartInstance.destroy();
+    }
+    
+    pieChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(summary),
+            datasets: [{
+                data: Object.values(summary).map(s => Math.floor(s / 60)),
+                backgroundColor: colors,
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+// 棒グラフ生成
+function generateBarChart(records, period) {
+    const labels = [];
+    const data = {};
+    
+    // 科目ごとのデータを初期化
+    records.forEach(record => {
+        if (!data[record.subject]) {
+            data[record.subject] = {};
+        }
+    });
+    
+    // ラベルと日付ごとのデータを構築
+    if (period === 'day') {
+        // 1時間ごとのデータ
+        for (let i = 0; i < 24; i++) {
+            labels.push(`${i}:00`);
+        }
+        
+        records.forEach(record => {
+            const recordDate = new Date(record.date);
+            const hour = recordDate.getHours();
+            
+            if (!data[record.subject][hour]) {
+                data[record.subject][hour] = 0;
+            }
+            data[record.subject][hour] += timeToSeconds(record.time) / 60;
+        });
+    } else if (period === 'week') {
+        // 曜日ごと
+        const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+        for (let i = 0; i < 7; i++) {
+            labels.push(dayNames[i]);
+        }
+        
+        records.forEach(record => {
+            const recordDate = new Date(record.date);
+            const dayOfWeek = recordDate.getDay();
+            
+            if (!data[record.subject][dayOfWeek]) {
+                data[record.subject][dayOfWeek] = 0;
+            }
+            data[record.subject][dayOfWeek] += timeToSeconds(record.time) / 60;
+        });
+    } else if (period === 'month') {
+        // 日ごと
+        const today = new Date();
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        
+        for (let i = 1; i <= daysInMonth; i++) {
+            labels.push(`${i}日`);
+        }
+        
+        records.forEach(record => {
+            const recordDate = new Date(record.date);
+            const day = recordDate.getDate();
+            
+            if (!data[record.subject][day]) {
+                data[record.subject][day] = 0;
+            }
+            data[record.subject][day] += timeToSeconds(record.time) / 60;
+        });
+    }
+    
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+    const datasets = Object.keys(data).map((subject, index) => {
+        const values = labels.map((_, i) => data[subject][i] || 0);
+        return {
+            label: subject,
+            data: values,
+            backgroundColor: colors[index % colors.length],
+            borderColor: colors[index % colors.length],
+            borderWidth: 1
+        };
+    });
+    
+    const ctx = document.getElementById('barChart').getContext('2d');
+    
+    if (barChartInstance) {
+        barChartInstance.destroy();
+    }
+    
+    barChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '勉強時間（分）'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+// 統計表示
+function showStatistics(period) {
+    const records = JSON.parse(localStorage.getItem('records')) || [];
+    const filteredRecords = filterRecordsByPeriod(records, period);
+    
+    if (filteredRecords.length === 0) {
+        alert('この期間のデータがありません');
+        return;
+    }
+    
+    generatePieChart(filteredRecords);
+    generateBarChart(filteredRecords, period);
+}
+
+// 統計ボタン
+document.querySelector('.statistics').addEventListener('click', () => {
+    document.getElementById('homeScreen').style.display = 'none';
+    document.getElementById('statisticsScreen').style.display = 'block';
+    currentPeriod = 'day';
+    showStatistics('day');
+});
+
+// タブボタン
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentPeriod = e.target.dataset.period;
+        showStatistics(currentPeriod);
+    });
+});
+
+// 統計画面を閉じる
+function closeStatistics() {
+    document.getElementById('statisticsScreen').style.display = 'none';
+    document.getElementById('homeScreen').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
